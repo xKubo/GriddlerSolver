@@ -1,0 +1,70 @@
+<html>
+<head>
+<style>
+.normal {
+ border: 1px solid black;
+}
+
+.black {
+ border: 1px solid black;
+ background-color: black;
+ color: white;
+}
+
+.borderB {
+ border: 1px solid black;
+border-bottom: 3px solid black;
+}
+
+.borderR {
+border: 1px solid black;
+border-right: 3px solid black;
+}
+
+.borderBR {
+border: 1px solid black;
+border-bottom: 3px solid black;
+border-right: 3px solid black;
+}
+
+
+.emp {
+  background-color: tomato;
+  color: white;
+}
+
+table {
+  
+  table-layout: fixed;
+  border-spacing: 0px;
+   border-collapse: collapse;
+   padding: 1px
+   font-stretch:condensed;
+}
+
+td {
+text-align : center;
+width:10px;
+border: 1px solid black;
+border-spacing: 0px;
+margin: 0px;
+padding: 1px
+}
+</style>
+</head>
+<body>
+
+
+<h1>Test</h1>
+<table>
+<tr><td class="borderB">1</td><td style="background-color:#FF0000" class="emp borderBR">1</td><td>1</td><td>1</td><td>1</td></tr>
+<tr><td>1</td><td class="emp borderR">1</td><td>1</td><td>1</td><td>1</td></tr>
+<tr><td class="borderR">1</td><td>1</td><td>X</td><td>10</td><td></td></tr>
+<tr><td>1</td><td>1</td><td class="emp">1</td><td>1</td><td>x</td></tr>
+<tr><td class="borderBR">1</td><td class="normal">1</td><td class="black"></td><td>1</td><td>1</td></tr>
+</table>
+
+$$TABLE$$
+
+</body>
+</html>

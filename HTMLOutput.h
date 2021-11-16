@@ -3,8 +3,12 @@
 #include <string>
 #include <variant>
 
+#include "Splice.h"
+
 namespace HTML
 {
+	using Splice::CExtents;
+
 	enum struct Color
 	{
 		Black,
@@ -31,15 +35,14 @@ namespace HTML
 	struct CTable
 	{
 		CTable() {}
-		CTable(int W, int H, CElements e) :
-			m_Width(W),
-			m_Height(H),
+		CTable(CExtents ex, CElements e) :
+			m_Extents(ex),
 			m_Elements(e)
 		{
 
 		}
 	private:
-		int m_Width = 0, m_Height = 0;
+		CExtents m_Extents;
 		std::vector<CElement> m_Elements;
 	};
 
