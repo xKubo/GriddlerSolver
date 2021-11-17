@@ -4,30 +4,32 @@
 #include <variant>
 
 #include "Splice.h"
+#include "Utils.h"
 
 namespace HTML
 {
 	using Splice::CExtents;
+	using Utils::Check;
 
-	enum struct Color
+	enum struct CColor
 	{
-		Black,
 		White,
+		Black,
 	};
 
-	enum struct Borders
+	enum struct CBorders
 	{
-		None, 
-		Right,
-		Bottom,
-		BottomRight,
+		None = 0, 
+		Top = 1,
+		Left = 2,
+		TopLeft = 3,
 	};
 
 	struct CElement
 	{
 		std::string Text;
-		Color Background = Color::White;
-		Borders Borders = Borders::None;
+		CColor Background = CColor::White;
+		CBorders Borders = CBorders::None;
 	};
 
 	using CElements = std::vector<CElement>;
@@ -41,36 +43,54 @@ namespace HTML
 		{
 
 		}
+
+		CExtents Extents() const
+		{
+			return m_Extents;
+		}
+
+		const CElements &Elements() const
+		{
+			return m_Elements;
+		}
+
 	private:
 		CExtents m_Extents;
-		std::vector<CElement> m_Elements;
+		CElements m_Elements;
 	};
 
 	struct CHTMLOutput
 	{
-		CHTMLOutput(const std::istream& HTMLTemplate)
+		struct CInfo
 		{
+			std::string Description;
+			CTable Data;
+		};
 
-		}
+		CHTMLOutput(const std::string& HTMLTemplate);
 
-		void AddTable(const std::string& Description, const CTable& t)
-		{
-
-		}
+		void AddTable(const std::string& Description, const CTable& t);
 
 		void AddError(const std::string& s)
 		{
-
+			CInfo i;
+			i.Description = s;
+			m_Infos.push_back(i);
 		}
 
-		void OutputToStream(std::ostream& o)
-		{
-
-		}
+		void OutputToStream(std::ostream& o);
 
 	private:
-		
+		std::string m_Prefix, m_Postfix;
+		std::vector<CInfo> m_Infos;
 	};
+
+	template <typename E>
+	inline E AddFlag(E &e1, E e2)
+	{
+		e1 = static_cast<E>(static_cast<int>(e1) | static_cast<int>(e2));
+		return e1;
+	}
 	
 }
 

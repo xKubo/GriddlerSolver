@@ -10,6 +10,7 @@
 
 using namespace Grid;
 using namespace HTML;
+using Utils::IntSize;
 
 CTable CreateFromGrid(const CGrid& g)
 {
@@ -28,25 +29,38 @@ CTable CreateFromGrid(const CGrid& g)
     CElements es(e.W * e.H);
 
     const auto& vs = g.Vertical();
-    for (int i = 0; i < vs.size(); ++i)
+    for (int i = 0; i < IntSize(vs); ++i)
     {
         int Empty = vs[i].size() - MaxVert;
-        for (int j = 0; j < vs[i].size(); ++j)
+        for (int j = 0; j < IntSize(vs[i]); ++j)
         {
             es[MaxHoriz + i + (j+Empty) * W].Text = std::to_string(vs[i][j]);
         }
     }
 
     const auto& hs = g.Horizontal();
-    for (int i = 0; i < hs.size(); ++i)
+    for (int i = 0; i < IntSize(hs); ++i)
     {
-        int Empty = vs[i].size() - MaxHoriz;
-        for (int j = 0; j < vs[i].size(); ++j)
+        int Empty = IntSize(vs[i]) - MaxHoriz;
+        for (int j = 0; j < IntSize(vs[i]); ++j)
         {
             es[j + Empty + (MaxVert + i) * W].Text = std::to_string(vs[i][j]);
         }
     }
 
+    static const int GridLine = 5;
+
+    for (int i = MaxVert; i < g.Extents().H; i += GridLine)
+    {
+        for (int j = 0; j < g.Extents().W; j++)
+            AddFlag(es[i*g.Extents().W + j].Borders, CBorders::Top);
+    }
+
+    for (int i = MaxHoriz; i < g.Extents().W; i += GridLine)
+    {
+        for (int j = 0; j < g.Extents().H; j++)
+            AddFlag(es[j * g.Extents().W + i].Borders, CBorders::Left);
+    }
 
     CTable t{ g.Extents(),  es };
 
@@ -66,7 +80,8 @@ int main()
         Check(HTMLTemplate.good(), "Template file error");
         std::ofstream of("out.html");
         Check(of.good(), "Output file error");
-        CHTMLOutput ho(HTMLTemplate);
+        std::string sHTMLTemplate = LoadAllFromStream(HTMLTemplate);
+        CHTMLOutput ho(sHTMLTemplate);
 
         try
         {

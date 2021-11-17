@@ -54,4 +54,15 @@ namespace Utils
 		auto s = GetLine(i);
 		return SplitStringIntoNums(s);
 	}
+
+	inline std::string LoadAllFromStream(std::istream& i)
+	{
+		return std::string{ std::istream_iterator<char>(i), std::istream_iterator<char>{} };
+	}
+
+	template <typename T>
+	inline int IntSize(const std::vector<T>& t)
+	{
+		return static_cast<int>(t.size());
+	}
 }
