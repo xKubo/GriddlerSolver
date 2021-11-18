@@ -26,6 +26,7 @@ CTable CreateFromGrid(const CGrid& g)
 
     CElements es(e.W * e.H);
 
+    
     const auto& vs = g.Vertical();
     for (int i = 0; i < IntSize(vs); ++i)
     {
@@ -35,32 +36,33 @@ CTable CreateFromGrid(const CGrid& g)
             es[MaxHoriz + i + (j+Empty) * W].Text = std::to_string(vs[i][j]);
         }
     }
+    
 
     const auto& hs = g.Horizontal();
     for (int i = 0; i < IntSize(hs); ++i)
     {
-        int Empty = MaxHoriz - IntSize(vs[i]);
-        for (int j = 0; j < IntSize(vs[i]); ++j)
+        int Empty = MaxHoriz - IntSize(hs[i]);
+        for (int j = 0; j < IntSize(hs[i]); ++j)
         {
-            es[j + Empty + (MaxVert + i) * W].Text = std::to_string(vs[i][j]);
+            es[j + Empty + (MaxVert + i) * W].Text = std::to_string(hs[i][j]);
         }
     }
 
     static const int GridLine = 5;
 
-    for (int i = MaxVert; i < g.Extents().H; i += GridLine)
+    for (int i = MaxVert; i < e.H; i += GridLine)
     {
-        for (int j = 0; j < g.Extents().W; j++)
-            AddFlag(es[i*g.Extents().W + j].Borders, CBorders::Left);
+        for (int j = 0; j < e.W; j++)
+            AddFlag(es[i*e.W + j].Borders, CBorders::Top);
     }
 
-    for (int i = MaxHoriz; i < g.Extents().W; i += GridLine)
+    for (int i = MaxHoriz; i < e.W; i += GridLine)
     {
-        for (int j = 0; j < g.Extents().H; j++)
-            AddFlag(es[j * g.Extents().W + i].Borders, CBorders::Top);
+        for (int j = 0; j < e.H; j++)
+            AddFlag(es[j * e.W + i].Borders, CBorders::Left);
     }
 
-    CTable t{ g.Extents(),  es };
+    CTable t{ e,  es };
 
     return t;
 }

@@ -50,10 +50,10 @@ namespace HTML
 
 			o << "<TABLE>" << endl;
 
-			for (int x = 0; x < W; ++x)
+			for (int y = 0; y < i.Data.Extents().H; ++y)
 			{
 				o << "<TR>";
-				for (int y = 0; y < i.Data.Extents().H; ++y)
+				for (int x = 0; x < i.Data.Extents().W; ++x)
 				{
 					const auto& e = i.Data.Elements()[x + y * W];
 					PrintElement(e, o);
