@@ -7,6 +7,7 @@
 #include "Grid.h"
 #include "HTMLOutput.h"
 #include "Utils.h"
+#include "Solver.h"
 
 using namespace Grid;
 using namespace HTML;
@@ -75,7 +76,7 @@ int main()
 
     try
     {
-        std::ifstream i("in.txt"), HTMLTemplate("template.htm");
+        std::ifstream i("in3.txt"), HTMLTemplate("template.htm");
         Check(i.good(), "Input file error");
         Check(HTMLTemplate.good(), "Template file error");
 
@@ -91,6 +92,9 @@ int main()
             CGrid g = LoadFromStream(i);
             CTable t = CreateFromGrid(g);
             ho.AddTable("Unsolved", t);
+            CGrid gSolved = Solver::SolveGrid(g);
+            CTable tSolved = CreateFromGrid(gSolved);
+            ho.AddTable("Solved", tSolved);
         }
         catch (const std::exception &e)
         {
