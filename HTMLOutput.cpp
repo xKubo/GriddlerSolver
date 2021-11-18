@@ -22,22 +22,33 @@ namespace HTML
 
 	void PrintElement(CElement e, std::ostream& o)
 	{
-		static const std::vector<std::string> BorderClasses = { "normal", "borderT", "borderL", "borderTL" };
+		static const std::vector<std::string> BorderClasses = { "", "borderT", "borderL", "borderTL" };
 		static const std::vector<std::string> BkgndClasses = { "normal", "black" };
 
 		o << "<TD class=\"" << BkgndClasses[static_cast<int>(e.Background)] 
-			<< " " << BorderClasses[static_cast<int>(e.Borders)] << ">" << e.Text << "</TD>";
+			<< " " << BorderClasses[static_cast<int>(e.Borders)] << "\">" << e.Text << "</TD>";
 	}
 
 	void CHTMLOutput::OutputToStream(std::ostream& o)
 	{
+		
+		using namespace std;
+
+		o << m_Prefix << endl;
+
+
+
 		for (const auto& i : m_Infos)
 		{
-			o << "<BR>";
-			o << "<H1>" << i.Description << "</H1>";
-			o << "<BR>";
+			o << "<BR>" << endl;
+			o << "<H1>" << i.Description << "</H1>" << endl;
+			o << "<BR>" << endl;
 
 			int W = i.Data.Extents().W;
+			if (W == 0)
+				continue;
+
+			o << "<TABLE>" << endl;
 
 			for (int x = 0; x < W; ++x)
 			{
@@ -47,9 +58,12 @@ namespace HTML
 					const auto& e = i.Data.Elements()[x + y * W];
 					PrintElement(e, o);
 				}
-				o << "</TR>";
+				o << "</TR>" << endl;
 			}
+
+			o << "</TABLE>" << endl;
 		}
 
+		o << m_Postfix << endl;
 	}
 }

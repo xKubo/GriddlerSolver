@@ -38,6 +38,8 @@ namespace Utils
 
 		for (const auto& s : str)
 		{
+			if (s.empty())
+				continue;
 			size_t Idx;
 			int num = std::stoi(s, &Idx);
 			Check(num >= 0, "NumMustBePositive");
@@ -57,7 +59,7 @@ namespace Utils
 
 	inline std::string LoadAllFromStream(std::istream& i)
 	{
-		return std::string{ std::istream_iterator<char>(i), std::istream_iterator<char>{} };
+		return std::string{ std::istreambuf_iterator<char>(i), std::istreambuf_iterator<char>{} };
 	}
 
 	template <typename T>

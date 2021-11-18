@@ -1,0 +1,85 @@
+<html>
+<head>
+<style>
+.normal {
+ border: 1px solid black;
+}
+
+.black {
+ border: 1px solid black;
+ background-color: black;
+ color: white;
+}
+
+.borderT {
+ border: 1px solid black;
+border-top: 4px solid black;
+}
+
+.borderL {
+border: 1px solid black;
+border-left: 4px solid black;
+}
+
+.borderTL {
+border: 1px solid black;
+border-top: 4px solid black;
+border-left: 4px solid black;
+}
+
+
+.emp {
+  background-color: tomato;
+  color: white;
+}
+
+table {
+  
+  table-layout: fixed;
+  border-spacing: 0px;
+   border-collapse: collapse;
+   padding: 1px
+   font-stretch:condensed;
+}
+
+td {
+text-align : center;
+width:10px;
+border: 1px solid black;
+border-spacing: 0px;
+margin: 0px;
+padding: 1px
+}
+</style>
+</head>
+<body>
+
+
+<h1>Test</h1>
+<table>
+<tr><td class="borderT">1</td><td style="background-color:#FF0000" class="emp borderTL">1</td><td>1</td><td>1</td><td>1</td></tr>
+<tr><td>1</td><td class="emp borderL">1</td><td>1</td><td>1</td><td>1</td></tr>
+<tr><td class="borderL">1</td><td>1</td><td>X</td><td>10</td><td></td></tr>
+<tr><td>1</td><td>1</td><td class="emp">1</td><td>1</td><td>x</td></tr>
+<tr><td class="borderTL">1</td><td class="normal">1</td><td class="black"></td><td>1</td><td>1</td></tr>
+</table>
+
+
+<BR>
+<H1>Unsolved</H1>
+<BR>
+<TABLE>
+<TR><TD class="normal "></TD><TD class="normal "></TD><TD class="normal borderL">3</TD><TD class="normal "></TD><TD class="normal "></TD><TD class="normal "></TD></TR>
+<TR><TD class="normal "></TD><TD class="normal ">4</TD><TD class="normal borderL">3</TD><TD class="normal "></TD><TD class="normal ">1</TD><TD class="normal "></TD></TR>
+<TR><TD class="normal "></TD><TD class="normal ">4</TD><TD class="normal borderL">2</TD><TD class="normal "></TD><TD class="normal ">1</TD><TD class="normal "></TD></TR>
+<TR><TD class="normal borderT">2</TD><TD class="normal borderT"></TD><TD class="normal borderTL">2</TD><TD class="normal borderT"></TD><TD class="normal borderT"></TD><TD class="normal borderT"></TD></TR>
+<TR><TD class="normal ">1</TD><TD class="normal "></TD><TD class="normal borderL">1</TD><TD class="normal "></TD><TD class="normal "></TD><TD class="normal "></TD></TR>
+<TR><TD class="normal "></TD><TD class="normal "></TD><TD class="normal borderL">1</TD><TD class="normal "></TD><TD class="normal "></TD><TD class="normal "></TD></TR>
+<TR><TD class="normal "></TD><TD class="normal ">2</TD><TD class="normal borderL"></TD><TD class="normal "></TD><TD class="normal "></TD><TD class="normal "></TD></TR>
+<TR><TD class="normal "></TD><TD class="normal ">1</TD><TD class="normal borderL">2</TD><TD class="normal "></TD><TD class="normal "></TD><TD class="normal "></TD></TR>
+<TR><TD class="normal borderT"></TD><TD class="normal borderT"></TD><TD class="normal borderTL">2</TD><TD class="normal borderT"></TD><TD class="normal borderT"></TD><TD class="normal borderT"></TD></TR>
+</TABLE>
+
+
+</body>
+</html>

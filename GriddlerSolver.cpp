@@ -16,8 +16,6 @@ CTable CreateFromGrid(const CGrid& g)
 {
     CExtents e = g.Extents();
 
-    
-
     int MaxVert = FindMaxNumbersCount(g.Vertical());
     int MaxHoriz = FindMaxNumbersCount(g.Horizontal());
 
@@ -31,7 +29,7 @@ CTable CreateFromGrid(const CGrid& g)
     const auto& vs = g.Vertical();
     for (int i = 0; i < IntSize(vs); ++i)
     {
-        int Empty = vs[i].size() - MaxVert;
+        int Empty = MaxVert - vs[i].size();
         for (int j = 0; j < IntSize(vs[i]); ++j)
         {
             es[MaxHoriz + i + (j+Empty) * W].Text = std::to_string(vs[i][j]);
@@ -41,7 +39,7 @@ CTable CreateFromGrid(const CGrid& g)
     const auto& hs = g.Horizontal();
     for (int i = 0; i < IntSize(hs); ++i)
     {
-        int Empty = IntSize(vs[i]) - MaxHoriz;
+        int Empty = MaxHoriz - IntSize(vs[i]);
         for (int j = 0; j < IntSize(vs[i]); ++j)
         {
             es[j + Empty + (MaxVert + i) * W].Text = std::to_string(vs[i][j]);
@@ -53,13 +51,13 @@ CTable CreateFromGrid(const CGrid& g)
     for (int i = MaxVert; i < g.Extents().H; i += GridLine)
     {
         for (int j = 0; j < g.Extents().W; j++)
-            AddFlag(es[i*g.Extents().W + j].Borders, CBorders::Top);
+            AddFlag(es[i*g.Extents().W + j].Borders, CBorders::Left);
     }
 
     for (int i = MaxHoriz; i < g.Extents().W; i += GridLine)
     {
         for (int j = 0; j < g.Extents().H; j++)
-            AddFlag(es[j * g.Extents().W + i].Borders, CBorders::Left);
+            AddFlag(es[j * g.Extents().W + i].Borders, CBorders::Top);
     }
 
     CTable t{ g.Extents(),  es };
@@ -75,11 +73,13 @@ int main()
 
     try
     {
-        std::ifstream i("in.txt"), HTMLTemplate("temp.html");
+        std::ifstream i("in.txt"), HTMLTemplate("template.htm");
         Check(i.good(), "Input file error");
         Check(HTMLTemplate.good(), "Template file error");
+
         std::ofstream of("out.html");
         Check(of.good(), "Output file error");
+
         std::string sHTMLTemplate = LoadAllFromStream(HTMLTemplate);
         CHTMLOutput ho(sHTMLTemplate);
 
