@@ -21,7 +21,7 @@ namespace Row
 
 		}
 
-		std::span<const int> Numbers()
+		std::span<const int> Numbers() const
 		{
 			return m_Numbers;
 		}

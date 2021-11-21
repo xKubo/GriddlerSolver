@@ -63,7 +63,7 @@ namespace Utils
 	}
 
 	template <typename T>
-	inline int IntSize(const std::vector<T>& t)
+	inline int IntSize(const T& t)
 	{
 		return static_cast<int>(t.size());
 	}

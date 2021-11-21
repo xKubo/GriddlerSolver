@@ -46,7 +46,7 @@ namespace Row
 			return other.m_Index - this->m_Index;
 		}
 
-		CValue& dereference() const { return m_pRow->Values(m_Index); }
+		CValue& dereference() const { return m_pRow->Values()[m_Index]; }
 
 		CRow<TRowData>* m_pRow = nullptr;
 		int m_Index = 0;
@@ -85,7 +85,7 @@ namespace Row
 			return other.m_Index - this->m_Index;
 		}
 
-		const CValue& dereference() const { return m_pRow->Values(m_Index); }
+		const CValue& dereference() const { return m_pRow->Values()[m_Index]; }
 
 		const CRow<TRowData>* m_pRow = nullptr;
 		int m_Index = 0;
@@ -96,12 +96,6 @@ namespace Row
 
 	template <typename TRowData>
 	using TConstRowRange = std::ranges::subrange<TConstRowIterator<TRowData>, TConstRowIterator<TRowData>>;
-
-	struct CNumbers
-	{
-		int Stride; // -1, +1
-		
-	};
 
 	template <typename TRowData>
 	struct CRow
@@ -116,19 +110,51 @@ namespace Row
 
 		}
 
-	private:
-		int m_Stride = 0;  // -1, +1, -W, +W
-		int m_Length = 0;
-
-		TRowIterator<TRowData> begin() const
+		TConstRowIterator<TRowData> begin() const
 		{
 			return { *this, 0 };
 		}
 
-		TRowIterator<TRowData> end() const
+		TConstRowIterator<TRowData> end() const
 		{
-
+			return { *this, m_Length };
 		}
+
+		TRowIterator<TRowData> begin() 
+		{
+			return { *this, 0 };
+		}
+
+		TRowIterator<TRowData> end() 
+		{
+			return { *this, m_Length };
+		}
+		
+		std::span<const CValue> Values() const
+		{
+			return m_Data.Values();
+		}
+
+		std::span<CValue> Values()
+		{
+			return m_Data.Values();
+		}
+
+		std::span<const int> Numbers() const
+		{
+			return m_Data.Numbers();
+		}
+
+		int Length() const
+		{
+			return m_Length;
+		}
+
+	private:
+		int m_Stride = 0;  // -1, +1, -W, +W
+		int m_Length = 0;
+
+
 		
 		TRowData m_Data;
 	};

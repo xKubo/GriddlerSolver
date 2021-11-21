@@ -15,6 +15,7 @@ using Grid::CValue;
 using Row::TStringRow;
 using Solver::SolveRow;
 using Utils::Check;
+using Utils::IntSize;
 
 struct CTestCase
 {
@@ -23,14 +24,30 @@ struct CTestCase
 	std::string Expected;
 };
 
-std::vector<CValue> LoadFromString(const std::string& Vals)
+std::string sVals = "OXB";
+
+std::vector<CValue> LoadFromString(const std::string& str)
 {
-	return {};
+	Grid::CValues vs;
+	for (char c : str)
+	{
+		auto pos = sVals.find(c);
+		Check(pos != -1, "Invalid value char: ", c);
+		vs.push_back(static_cast<CValue>(pos));
+	}
+	return vs;
 }
 
 std::string SaveToString(std::span<CValue> vals)
 {
-	return {};
+	std::string res;
+	for (CValue v : vals)
+	{
+		int pos = static_cast<int>(v);
+		Check(pos < IntSize(sVals), "Unexpected value: ", pos);
+		res.push_back(sVals[pos]);
+	}
+	return res;
 }
 
 void TestRow(const CTestCase& tc)
@@ -49,12 +66,12 @@ void TestRow(const CTestCase& tc)
 
 BOOST_AUTO_TEST_SUITE(Basics)
 
-BOOST_AUTO_TEST_CASE(TwoBlack)
+BOOST_AUTO_TEST_CASE(TooFewInfo)
 {
 	TestRow({
-		"OO",
+		"OOOO",
 		{2},
-		"BB",
+		"OOOO",
 	});
 	BOOST_REQUIRE(1 == 1);
 }
