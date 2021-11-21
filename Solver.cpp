@@ -8,5 +8,7 @@ namespace Solver
 		return g;
 	}
 
+
+
 }
 

@@ -7,4 +7,5 @@ namespace Solver
 	using Grid::CGrid;
 
 	CGrid SolveGrid(const CGrid& g);
+
 }
