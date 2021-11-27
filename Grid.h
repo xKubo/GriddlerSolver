@@ -19,7 +19,7 @@ namespace Grid
 
 	using Splice::CExtents;
 
-	enum CValue
+	enum struct CValue
 	{
 		None,
 		Cross,

@@ -2,7 +2,6 @@
 //
 #include "stdafx.h"
 
-#include "../Row.h"
 #include "StringRow.h"
 #include "../Grid.h"
 #include "../SolveRow.h"
@@ -73,7 +72,24 @@ BOOST_AUTO_TEST_CASE(TooFewInfo)
 		{2},
 		"OOOO",
 	});
-	BOOST_REQUIRE(1 == 1);
+}
+
+BOOST_AUTO_TEST_CASE(AllBlacks)
+{
+	TestRow({
+		"OO",
+		{2},
+		"BB",
+		});
+}
+
+BOOST_AUTO_TEST_CASE(AllCrosses)
+{
+	TestRow({
+		"OO",
+		{},
+		"XX",
+		});
 }
 
 BOOST_AUTO_TEST_SUITE_END()
