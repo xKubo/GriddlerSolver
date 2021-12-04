@@ -56,7 +56,7 @@ void TestRow(const CTestCase& tc)
 	Row::CStringRowData d{ tc.Nums, Input };
 
 	Check(Input.size() == Expected.size(), "Input and expected values must have same size: ", Input.size(), "!=", Expected.size());
-	TStringRow sr{ d, 1, Utils::IntSize(Input)};
+	TStringRow sr{ d, 1, Utils::IntSize(Input), {0,0} };
 	SolveRow(sr);
 	
 	std::string Result = SaveToString(d.Values());

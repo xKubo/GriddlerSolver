@@ -14,6 +14,11 @@ namespace Solver
 	using namespace std::ranges;
 	using namespace Result;
 
+	template <typename TIt>
+	CVoid Mark(TIt From, TIt To, CValue val)
+	{
+		return {};
+	}
 
 	template <view TValues, view TNumbers, view TPositions>
 	requires 
@@ -23,8 +28,8 @@ namespace Solver
 	{
 		using namespace std;
 		using namespace std::ranges;
-		auto iBeg = begin(vs);
-		auto iEnd = end(vs);
+		auto iBeg = std::begin(vs);
+		auto iEnd = std::end(vs);
 
 
 		CVoid res;
@@ -34,7 +39,7 @@ namespace Solver
 			if (std::distance(iBeg, iEnd) < n)
 				return ErrorCode::LineTooSmall;
 
-			auto itS = std::ranges::find(iBeg, iBeg + n, Grid::CValue::Cross);
+			auto itS = std::find(iBeg, iBeg + n, Grid::CValue::Cross);
 			if (itS != iBeg + n)
 			{
 				res = Mark(iBeg, itS, CValue::Cross);
@@ -45,22 +50,21 @@ namespace Solver
 
 
 		}
-
 	}
 
 
-	template <typename TRowData>
-	CVoid SolveRow(CRow<TRowData> Input)
+	template <typename TRow>
+	CVoid SolveRow(TRow &Input)
 	{
 		int NumSize = Input.Numbers().size();
 		std::vector<int> Lefts(NumSize), Rights(NumSize);
-		auto r = SolveOnePart(subrange(Input.Values()), subrange(Input.Numbers()), subrange(Lefts));
+		auto r = SolveOnePart(subrange(Input.Vals()), subrange(Input.Numbers()), subrange(Lefts));
 		if (!r) return r;
 		return ErrorCode::NoError;
 		for (int i = 0; i<Input.Length(); ++i)
 		{
-			CValue& val = Input.Values()[i];
-			int Num = Input.Numbers()[i];
+			//CValue& val = Input.Values()[i];
+			//int Num = Input.Numbers()[i];
 		}
 	}
 }

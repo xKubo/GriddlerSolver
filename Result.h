@@ -8,6 +8,7 @@ namespace Result
 	{
 		NoError = 0,
 		Uninitialized = 1,
+		LineTooSmall = 2,
 	};
 
 	template <typename TResult = void>
