@@ -57,22 +57,14 @@ void TestRow(const CTestCase& tc)
 
 	Check(Input.size() == Expected.size(), "Input and expected values must have same size: ", Input.size(), "!=", Expected.size());
 	TStringRow sr{ d, 1, Utils::IntSize(Input), {0,0} };
-	SolveRow(sr);
-	
-	std::string Result = SaveToString(d.Values());
-	BOOST_CHECK_EQUAL(tc.Expected, Result);
+	auto r = SolveRow(sr);
+	BOOST_CHECK(r);
+
+	std::string vals = SaveToString(sr.Values());
+	BOOST_CHECK_EQUAL(tc.Expected, vals);
 }
 
 BOOST_AUTO_TEST_SUITE(Basics)
-
-BOOST_AUTO_TEST_CASE(TooFewInfo)
-{
-	TestRow({
-		"OOOO",
-		{2},
-		"OOOO",
-	});
-}
 
 BOOST_AUTO_TEST_CASE(AllBlacks)
 {
@@ -91,5 +83,18 @@ BOOST_AUTO_TEST_CASE(AllCrosses)
 		"XX",
 		});
 }
+
+BOOST_AUTO_TEST_CASE(TooFewInfo)
+{
+	TestRow({
+		"OOOO",
+		{2},
+		"OOOO",
+	});
+}
+
+
+
+
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -139,7 +139,7 @@ namespace Row
 			TRowIterator<TRowData> iEnd = { ValueAt(m_Position), - m_Stride };
 			auto iBeg = iEnd;
 			std::advance(iBeg, - m_Stride * m_Length);
-			return subrange(iBeg, iEnd);
+			return std::ranges::subrange(iBeg, iEnd);
 		}
 
 		TConstRowRange<TRowData> Vals() const
@@ -166,7 +166,7 @@ namespace Row
 		auto RNumbers() const
 		{
 			auto spn = m_Data.Numbers();
-			return subrange(spn.rbegin(), spn.rend());
+			return std::ranges::subrange(spn.rbegin(), spn.rend());
 		}
 
 		int Length() const

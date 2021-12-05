@@ -8,3 +8,6 @@
 #include <sstream>
 #include <span>
 #include <vector>
+
+#include <ranges>
+#include <optional>
