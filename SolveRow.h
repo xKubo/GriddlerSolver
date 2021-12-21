@@ -68,16 +68,24 @@ namespace Solver
 
 			// find and mark possible blacks
 			auto iBlackEnd = std::find(iBeg + n, iEnd, Grid::CValue::Black);
-			auto iBlackBeg = std::find(iBeg, iBlackEnd, Grid::CValue::Black);
-			res = Mark(iBlackBeg, iBlackEnd, Grid::CValue::Cross);
-			if (!res) return res;
+			if (iBlackEnd != iEnd)		 // we found some blacks after the number
+			{
+				// mark blacks after the block
+				auto iBlackBeg = std::find(iBeg, iBlackEnd, Grid::CValue::Black);
+				res = Mark(iBlackBeg, iBlackEnd, Grid::CValue::Cross);
+				if (!res) return res;
 
-			// if we had blacks after the number  - mark crosses at the beginning
-			auto iMin = iBlackEnd - n;
-			res = Mark(iBeg, iMin, Grid::CValue::Cross);
-			if (!res) return res;
+				// mark crosses at the beginning
+				auto iMin = iBlackEnd - n;
+				res = Mark(iBeg, iMin, Grid::CValue::Cross);
+				if (!res) return res;				
 
-			l = iMin - std::begin(vs);
+				l = iMin - std::begin(vs);
+			}
+			else
+				l = iBeg - std::begin(vs);
+
+			
 
 			// if we are not at the end move one field up
 			if (iBlackEnd == iEnd)
@@ -104,17 +112,19 @@ namespace Solver
 		CVoid res;
 		for (int i = 0; i < IntSize(nums); ++i)
 		{
-			optional<int>& l = Lefts[i];
-			optional<int>& r = Rights[Rights.size() - 1 - i];
+			optional<int>& left = Lefts[i];
+			optional<int>& right = Rights[Rights.size() - 1 - i];
 
 			int n = nums[i];
 
-			if (l && r)
+			if (left && right)
 			{
-				auto iBeg = begin(vs) + *l;
-				auto iEnd = begin(vs) + *r;
+				int l = *left;
+				int r = size(vs) - *right;		// the right value must be reversed - because it was generated from the other direction
+				auto iBeg = begin(vs) + l;
+				auto iEnd = begin(vs) + r;
 
-				int d = *r - *l;
+				int d = r - l;
 
 				int BlackFields = 2 * n - d;
 				auto iStart = iBeg + n - d;
@@ -127,21 +137,22 @@ namespace Solver
 
 			
 
-			if (r)
+			if (right)
 			{
+				int r = size(vs) - *right;
 				int EndOfCrosses;
 				bool IsLast = i == IntSize(nums) - 1;
 				
 				if (IsLast)
-					EndOfCrosses = IntSize(nums);
+					EndOfCrosses = IntSize(vs);
 				else
 				{
-					if (!l)
+					if (!Lefts[i+1])
 						continue;
-					EndOfCrosses = *l;
+					EndOfCrosses = *Lefts[i+1];
 				}
 
-				res = Mark(begin(vs) + *r, begin(vs) + EndOfCrosses, CValue::Cross);
+				res = Mark(begin(vs) + r, begin(vs) + EndOfCrosses, CValue::Cross);
 				if (!res) return res;
 			}
 
@@ -155,16 +166,16 @@ namespace Solver
 		int NumSize = Input.Numbers().size();
 		if (NumSize == 0)
 			return Mark(Input.Vals().begin(), Input.Vals().end(), Grid::CValue::Cross);
-		std::vector<std::optional<int>> Ls(NumSize), Rights(NumSize);
+		std::vector<std::optional<int>> Lefts(NumSize), Rights(NumSize);
 
-		auto Lefts = subrange(Ls);
-		auto RRights = subrange(Rights.rbegin(), Rights.rend());
+		auto vLefts = subrange(Lefts);
+		auto vRRights = subrange(Rights.rbegin(), Rights.rend());
 
-		CVoid r = SolveOnePart(Input.Vals(), Input.Numbers(), Lefts, RRights);
+		CVoid r = SolveOnePart(Input.Vals(), Input.Numbers(), vLefts, vRRights);
 		if (!r) return r;
-		r = SolveOnePart(Input.RVals(), Input.RNumbers(), RRights, Lefts);
+		r = SolveOnePart(Input.RVals(), Input.RNumbers(), vRRights, vLefts);
 		if (!r) return r;
-		r = EvaluateLeftsAndRights(Input.Vals(), Input.Numbers(), Lefts, subrange(Rights));
+		r = EvaluateLeftsAndRights(Input.Vals(), Input.Numbers(), vLefts, subrange(Rights));
 		if (!r) return r;
 		return ErrorCode::NoError;
 
