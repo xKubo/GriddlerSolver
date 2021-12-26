@@ -10,10 +10,11 @@ namespace Result
 		Uninitialized = 1,
 		LineTooSmall = 2,
 		AlreadySpecified = 3,
+		TooManyBlacks = 4,
 	};
 
 	template <typename TResult = void>
-	struct CResult
+	struct [[nodiscard]] CResult
 	{
 		CResult() = default;
 
@@ -35,9 +36,14 @@ namespace Result
 
 		}
 
+		const TResult& Result() const
+		{
+			return std::get<TResult>(m_Data);
+		}
+
 		TResult& Result()
 		{
-			return std::get<TResult>();
+			return std::get<TResult>(m_Data);
 		}
 
 		ErrorCode Code() const
@@ -55,7 +61,7 @@ namespace Result
 	};
 
 	template <>
-	struct CResult<void>
+	struct [[nodiscard]] CResult<void>
 	{
 		CResult() = default;
 

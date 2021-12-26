@@ -9,6 +9,8 @@
 
 #include "Result.h"
 
+#include "Line.h"
+
 namespace Solver
 {
 	using Row::CRow;
@@ -32,13 +34,15 @@ namespace Solver
 		return ErrorCode::NoError;
 	}
 
-	template <view TValues, view TNumbers, view TLefts, view TRights>
+
+
+
+	template <view TValues, view TNumbers, view TLefts>
 	requires 
 		std::is_same_v<range_value_t<TValues>, CValue> &&
 		std::integral<range_value_t<TNumbers>>
-	inline CVoid SolveOnePart(TValues vs, TNumbers nums, TLefts Lefts, TRights Rights)
+	inline CVoid SolveOnePart(TValues vs, TNumbers nums, TLefts Lefts)
 	{
-		using namespace std;
 		using namespace std::ranges;
 		auto iBeg = std::begin(vs);
 		auto iEnd = std::end(vs);
@@ -47,10 +51,10 @@ namespace Solver
 
 		for (int i = 0; i < IntSize(nums); ++i)
 		{
+
 			bool IsLast = i == nums.size() - 1;
 			int n = nums[i];
-			optional<int>& l = Lefts[i];
-			optional<int>& r = Rights[i];
+			int& l = Lefts[i];
 
 			if (std::distance(iBeg, iEnd) < n)
 				return ErrorCode::LineTooSmall;
@@ -62,122 +66,87 @@ namespace Solver
 				res = Mark(iBeg, itS, CValue::Cross);
 				if (!res) return res;
 				iBeg = itS;
-				if (std::distance(iBeg, iEnd) < n)
-					return ErrorCode::LineTooSmall;
+				continue;
 			}
 
-			// find and mark possible blacks
-			auto iBlackEnd = std::find(iBeg + n, iEnd, Grid::CValue::Black);
-			if (iBlackEnd != iEnd)		 // we found some blacks after the number
+			l = std::distance(begin(vs), iBeg);
+
+			// find possible blacks after n squares
+			auto iBlackEnd = std::find_if(iBeg + n, iEnd, Not{ CValue::Black });
+
+			if (iBlackEnd != iEnd)
 			{
-				// mark blacks after the block
-				auto iBlackBeg = std::find(iBeg, iBlackEnd, Grid::CValue::Black);
-				res = Mark(iBlackBeg, iBlackEnd, Grid::CValue::Cross);
-				if (!res) return res;
-
-				// mark crosses at the beginning
-				auto iMin = iBlackEnd - n;
-				res = Mark(iBeg, iMin, Grid::CValue::Cross);
-				if (!res) return res;				
-
-				l = iMin - std::begin(vs);
+				// check that there are not too many blacks after the block
+				std::reverse_iterator itRBN{ iBeg + n };
+				std::reverse_iterator itRBeg{ iBeg };
+				auto itR = std::find_if(itRBN, itRBeg, Not{ CValue::Black });
+				if (std::distance(itR, itRBN) > n)
+					return Result::ErrorCode::TooManyBlacks;
+				iBeg = iBlackEnd + 1;
 			}
-			else
-				l = iBeg - std::begin(vs);
-
-			
-
-			// if we are not at the end move one field up
-			if (iBlackEnd == iEnd)
+			else  // blacks are up to end
 			{
-				if (IsLast)
-					return ErrorCode::NoError;
-				else
-					return ErrorCode::LineTooSmall;				
+				if (!IsLast)
+					return Result::ErrorCode::LineTooSmall;
 			}
-			
-			++iBlackEnd;
-
-			r = iBlackEnd - std::begin(vs);
-
-			iBeg = iBlackEnd;
 		}
 
 		return ErrorCode::NoError;
 	}
 
+
 	template <view TValues, view TNumbers, view TLefts, view TRights>
-	inline CVoid EvaluateLeftsAndRights(TValues vs, TNumbers nums, TLefts Lefts, TRights Rights)
+	inline Result::CResult<CLine> PrepareLineInfo(TValues vs, TNumbers nums, TLefts Lefts, TRights Rights)
 	{
-		CVoid res;
+		CLine l;
+
+		auto blacks = FindRuns(begin(vs), end(vs), CValue::Black);
+		for (auto b : blacks)
+		{
+			l.Blacks.push_back(b);
+		}
+
+		l.Crosses = FindRuns(begin(vs), end(vs), CValue::Cross);
+
 		for (int i = 0; i < IntSize(nums); ++i)
 		{
-			optional<int>& left = Lefts[i];
-			optional<int>& right = Rights[Rights.size() - 1 - i];
-
-			int n = nums[i];
-
-			if (left && right)
-			{
-				int l = *left;
-				int r = size(vs) - *right;		// the right value must be reversed - because it was generated from the other direction
-				auto iBeg = begin(vs) + l;
-				auto iEnd = begin(vs) + r;
-
-				int d = r - l;
-
-				int BlackFields = 2 * n - d;
-				auto iStart = iBeg + n - d;
-				if (BlackFields > 0)
-				{
-					res = Mark(iStart, iStart + BlackFields, CValue::Black);
-					if (!res) return res;
-				}
-			}
-
 			
-
-			if (right)
-			{
-				int r = size(vs) - *right;
-				int EndOfCrosses;
-				bool IsLast = i == IntSize(nums) - 1;
-				
-				if (IsLast)
-					EndOfCrosses = IntSize(vs);
-				else
-				{
-					if (!Lefts[i+1])
-						continue;
-					EndOfCrosses = *Lefts[i+1];
-				}
-
-				res = Mark(begin(vs) + r, begin(vs) + EndOfCrosses, CValue::Cross);
-				if (!res) return res;
-			}
-
+			int left = Lefts[i];
+			int reversedright = Rights[Rights.size() - 1 - i];
+			int right = size(vs) - reversedright;
+			int n = nums[i];
+			l.Numbers.push_back(CNumber{ n, {left, right} });
 		}
-		return Result::ErrorCode::NoError;
+		return l;
+	}
+
+	template <typename TIterator>
+	CVoid EvaluateLine(TIterator ValsBegin, TIterator ValsEnd, CLine& l)
+	{
+		return ErrorCode::NoError;
 	}
 
 	template <typename TRow>
 	inline CVoid SolveRow(TRow &Input)
 	{
+
 		int NumSize = Input.Numbers().size();
 		if (NumSize == 0)
 			return Mark(Input.Vals().begin(), Input.Vals().end(), Grid::CValue::Cross);
-		std::vector<std::optional<int>> Lefts(NumSize), Rights(NumSize);
+		std::vector<int> Lefts(NumSize), Rights(NumSize);
 
 		auto vLefts = subrange(Lefts);
 		auto vRRights = subrange(Rights.rbegin(), Rights.rend());
 
-		CVoid r = SolveOnePart(Input.Vals(), Input.Numbers(), vLefts, vRRights);
+		CVoid r = SolveOnePart(Input.Vals(), Input.Numbers(), vLefts);
 		if (!r) return r;
-		r = SolveOnePart(Input.RVals(), Input.RNumbers(), vRRights, vLefts);
-		if (!r) return r;
-		r = EvaluateLeftsAndRights(Input.Vals(), Input.Numbers(), vLefts, subrange(Rights));
-		if (!r) return r;
-		return ErrorCode::NoError;
 
+		r = SolveOnePart(Input.RVals(), Input.RNumbers(), vRRights);
+		if (!r) return r;
+
+		auto rLine = PrepareLineInfo(Input.Vals(), Input.Numbers(), vLefts, subrange(Rights));
+		if (!rLine) return rLine.Code();
+
+		return EvaluateLine(Input.Vals().begin(), Input.Vals().end(), rLine.Result());
 	}
 }

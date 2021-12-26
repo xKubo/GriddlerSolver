@@ -93,6 +93,23 @@ BOOST_AUTO_TEST_CASE(TooFewInfo)
 	});
 }
 
+BOOST_AUTO_TEST_CASE(SomeBlacks)
+{
+	TestRow({
+		"OOOOO",
+		{3},
+		"OOBOO",
+		});
+}
+
+BOOST_AUTO_TEST_CASE(BlackAtTheEnd)
+{
+	TestRow({
+		"OOOBB",
+		{3},
+		"XXBBB",
+		});
+}
 
 
 
