@@ -77,12 +77,12 @@ namespace Solver
 	struct CNumber
 	{
 		CNumber() = default;
-		CNumber(int v, CInterval i) : Value(v), Num(i)
+		CNumber(int v, CInterval i) : Value(v), Interval(i)
 		{
 
 		}
 		int Value;
-		CInterval Num;
+		CInterval Interval;
 		std::vector<int> Blacks;
 	};
 	using CNumbers = std::vector<CNumber>;
@@ -90,13 +90,13 @@ namespace Solver
 	struct CBlack
 	{
 		CBlack(CInterval i) :
-			Black(i)
+			Interval(i)
 		{
 
 		}
 
 		CBlack() = default;
-		CInterval Black;
+		CInterval Interval;
 		std::vector<int> Nums;
 	};
 	using CBlacks = std::vector<CBlack>;

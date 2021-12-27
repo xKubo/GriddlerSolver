@@ -33,6 +33,11 @@ namespace Solver
 			return m_Positions;
 		}
 
+		int Count() const
+		{
+			return m_Positions.size();
+		}
+
 	private:
 		TIterator m_Begin;
 		std::vector<int> m_Positions;

@@ -104,8 +104,8 @@ namespace Solver
 	}
 
 
-	template <view TValues, view TNumbers, view TLefts, view TRights>
-	inline Result::CResult<CLine> PrepareLineInfo(TValues vs, TNumbers nums, TLefts Lefts, TRights Rights, auto& chs)
+	template <view TValues, view TNumbers, view TLefts>
+	inline Result::CResult<CLine> PrepareLineInfo(TValues vs, TNumbers nums, TLefts Lefts, view auto Rights, auto& chs)
 	{
 		CLine l;
 
@@ -138,19 +138,21 @@ namespace Solver
 		return {l, r};
 	}
 
-	template <typename TIterator>
-	CVoid EvaluateLine(TIterator ValsBegin, TIterator ValsEnd, CLine& line, CChanges<TIterator>& chs)
+	template <typename TValues>
+	CVoid EvaluateLine(TValues Vals, CLine& line, auto& chs)
 	{
+		auto ValsBegin = begin(Vals);
+		auto ValsEnd = end(Vals);
 		int LineSize = ValsEnd - ValsBegin;
-		int MinVal = 0;
+		int MinVal = size(Vals);
 		for (int i = 0; i<IntSize(line.Numbers); ++i)
 		{
 			CNumber& n = line.Numbers[i];
 
 			MinVal = std::min(n.Value, MinVal);
 			
-			int l = n.Num.Left();
-			int r = n.Num.Right();
+			int l = n.Interval.Left();
+			int r = n.Interval.Right();
 			int sz = r - l;
 			if (sz < n.Value)
 				return ErrorCode::LineTooSmall;
@@ -158,7 +160,7 @@ namespace Solver
 
 			if (sz < 2 * n.Value)  // there are some blacks
 			{
-				int blackstart = sz - n.Value;
+				int blackstart = l + sz - n.Value;
 				int blacksize = 2 * n.Value - sz;
 				auto res = Mark(ValsBegin + blackstart, ValsBegin + blackstart + blacksize, CValue::Black, chs);
 				if (!res) return res;
@@ -183,17 +185,42 @@ namespace Solver
 			for (int bi = 0; bi < IntSize(line.Blacks); ++bi)
 			{
 				auto& b = line.Blacks[bi];
-				if (!Intersect(b.Black, n.Num).IsEmpty())
+				if (!Intersect(b.Interval, n.Interval).IsEmpty())
 				{
 					b.Nums.push_back(i);
 					n.Blacks.push_back(bi);
 				}
 			}
+		}
 
+		// if black has only one num, we can adjust l, r for that number
+		for (int bi = 0; bi < IntSize(line.Blacks); ++bi)
+		{
+			CBlack& b = line.Blacks[bi];
+			if (b.Nums.size() != 1)
+				continue;
+
+			CNumber& n = line.Numbers[b.Nums[0]];
+			int l = n.Interval.Left();
+			l = std::max(l, b.Interval.Right() - n.Value);
+			int r = n.Interval.Right();
+			r = std::min(r, b.Interval.Left() + n.Value);
+			n.Interval = CInterval{l, r};
 		}
 
 
 		// if there are 2 crosses closer than minval - we can connect them
+		int LastCrossAt = 0;
+		for (const auto& c : line.Crosses)
+		{
+			if (c.Left() - LastCrossAt < MinVal)
+			{
+				auto r = Mark(begin(Vals) + LastCrossAt, begin(Vals) + c.Left(), CValue::Cross, chs);
+				if (!r) return r.Code();
+			}
+				
+			LastCrossAt = c.Right();			
+		}
 
 		return ErrorCode::NoError;
 	}
@@ -226,8 +253,16 @@ namespace Solver
 			auto rLine = PrepareLineInfo(Input.Vals(), Input.Numbers(), vLefts, subrange(Rights), chs);
 			if (!rLine) return rLine.Code();
 
-			auto rEval = EvaluateLine(Input.Vals().begin(), Input.Vals().end(), rLine.Result(), chs);
-			if (!rEval) return rEval.Code();
+			for (;;)
+			{
+				int ChangeCount = chs.Count();
+
+				auto rEval = EvaluateLine(Input.Vals(), rLine.Result(), chs);
+				if (!rEval) return rEval.Code();
+				
+				if (chs.Count() == ChangeCount)
+					break;
+			}
 
 			if (chs.IsEmpty())
 				return ErrorCode::NoError;

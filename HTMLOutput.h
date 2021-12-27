@@ -14,7 +14,7 @@ namespace HTML
 	enum struct CColor
 	{
 		White,
-		Black,
+		Interval,
 	};
 
 	enum struct CBorders
