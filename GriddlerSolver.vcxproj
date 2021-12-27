@@ -153,13 +153,14 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Changes.h" />
     <ClInclude Include="Common.h" />
     <ClInclude Include="Line.h" />
     <ClInclude Include="Result.h" />
     <ClInclude Include="Row.h" />
     <ClInclude Include="Solver.h" />
     <ClInclude Include="SolveRow.h" />
-    <ClInclude Include="Splice.h" />
+    <ClInclude Include="Extents.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="HTMLOutput.h" />

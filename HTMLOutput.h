@@ -3,12 +3,12 @@
 #include <string>
 #include <variant>
 
-#include "Splice.h"
+#include "Extents.h"
 #include "Utils.h"
 
 namespace HTML
 {
-	using Splice::CExtents;
+	using Extents::CExtents;
 	using Utils::Check;
 
 	enum struct CColor

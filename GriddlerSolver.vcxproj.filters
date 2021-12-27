@@ -44,7 +44,7 @@
     <ClInclude Include="stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Splice.h">
+    <ClInclude Include="Extents.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Solver.h">
@@ -63,6 +63,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Line.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Changes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

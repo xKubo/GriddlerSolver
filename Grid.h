@@ -1,9 +1,8 @@
 #pragma once
 
 #include <vector>
-#include <iostream>
 
-#include "Splice.h"
+#include "Extents.h"
 
 namespace Grid
 {
@@ -17,7 +16,7 @@ namespace Grid
 		return it->size();
 	}
 
-	using Splice::CExtents;
+	using Extents::CExtents;
 
 	enum struct CValue
 	{

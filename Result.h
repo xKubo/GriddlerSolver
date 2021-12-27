@@ -53,7 +53,7 @@ namespace Result
 
 		operator bool() const
 		{
-			return m_Data.index() == 0;
+			return m_Data.index() == 1;
 		}
 
 	private:

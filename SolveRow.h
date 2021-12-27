@@ -10,6 +10,7 @@
 #include "Result.h"
 
 #include "Line.h"
+#include "Changes.h"
 
 namespace Solver
 {
@@ -23,13 +24,21 @@ namespace Solver
 	using Utils::IntSize;
 
 	template <typename TIt>
-	inline CVoid Mark(TIt From, TIt To, CValue val)
+	inline CVoid Mark(TIt From, TIt To, CValue val, CChanges<TIt> &chs)
 	{
 		for (TIt it = From; it != To; ++it)
 		{
-			if (*it != CValue::None && *it != val)
-				return ErrorCode::AlreadySpecified;
-			*it = val;
+			if (*it == CValue::None)
+			{
+				chs.Add(it);
+				*it = val;
+			}
+			else if (*it == val)
+			{
+		
+			}
+			else
+				return ErrorCode::AlreadySpecified;			
 		}
 		return ErrorCode::NoError;
 	}
@@ -41,7 +50,7 @@ namespace Solver
 	requires 
 		std::is_same_v<range_value_t<TValues>, CValue> &&
 		std::integral<range_value_t<TNumbers>>
-	inline CVoid SolveOnePart(TValues vs, TNumbers nums, TLefts Lefts)
+	inline CVoid SolveOnePart(TValues vs, TNumbers nums, TLefts Lefts, auto& chs)
 	{
 		using namespace std::ranges;
 		auto iBeg = std::begin(vs);
@@ -63,7 +72,7 @@ namespace Solver
 			auto itS = std::find(iBeg, iBeg + n, Grid::CValue::Cross);
 			if (itS != iBeg + n)
 			{
-				res = Mark(iBeg, itS, CValue::Cross);
+				res = Mark(iBeg, itS, CValue::Cross, chs);
 				if (!res) return res;
 				iBeg = itS;
 				continue;
@@ -96,7 +105,7 @@ namespace Solver
 
 
 	template <view TValues, view TNumbers, view TLefts, view TRights>
-	inline Result::CResult<CLine> PrepareLineInfo(TValues vs, TNumbers nums, TLefts Lefts, TRights Rights)
+	inline Result::CResult<CLine> PrepareLineInfo(TValues vs, TNumbers nums, TLefts Lefts, TRights Rights, auto& chs)
 	{
 		CLine l;
 
@@ -111,18 +120,81 @@ namespace Solver
 		for (int i = 0; i < IntSize(nums); ++i)
 		{
 			
-			int left = Lefts[i];
+			int Left = Lefts[i];
 			int reversedright = Rights[Rights.size() - 1 - i];
-			int right = size(vs) - reversedright;
+			int Right = size(vs) - reversedright;
 			int n = nums[i];
-			l.Numbers.push_back(CNumber{ n, {left, right} });
+			l.Numbers.push_back(CNumber{ n, {Left, Right} });
 		}
 		return l;
 	}
 
-	template <typename TIterator>
-	CVoid EvaluateLine(TIterator ValsBegin, TIterator ValsEnd, CLine& l)
+	inline CInterval Intersect(CInterval i1, CInterval i2)
 	{
+		int l = std::max(i1.Left(), i2.Left());
+		int r = std::min(i1.Right(), i2.Right());
+		if (r < l)
+			return { };
+		return {l, r};
+	}
+
+	template <typename TIterator>
+	CVoid EvaluateLine(TIterator ValsBegin, TIterator ValsEnd, CLine& line, CChanges<TIterator>& chs)
+	{
+		int LineSize = ValsEnd - ValsBegin;
+		int MinVal = 0;
+		for (int i = 0; i<IntSize(line.Numbers); ++i)
+		{
+			CNumber& n = line.Numbers[i];
+
+			MinVal = std::min(n.Value, MinVal);
+			
+			int l = n.Num.Left();
+			int r = n.Num.Right();
+			int sz = r - l;
+			if (sz < n.Value)
+				return ErrorCode::LineTooSmall;
+
+
+			if (sz < 2 * n.Value)  // there are some blacks
+			{
+				int blackstart = sz - n.Value;
+				int blacksize = 2 * n.Value - sz;
+				auto res = Mark(ValsBegin + blackstart, ValsBegin + blackstart + blacksize, CValue::Black, chs);
+				if (!res) return res;
+			}
+
+			if (sz == n.Value)  // exact fit - we can make cross before and after - if possible
+			{
+				if (l != 0)
+				{
+					auto res = Mark(ValsBegin + l - 1, ValsBegin + l, CValue::Cross, chs);
+					if (!res) return res;
+				}
+
+				if (r < LineSize - 1)
+				{
+					auto res = Mark(ValsBegin + r, ValsBegin + r + 1, CValue::Cross, chs);
+					if (!res) return res;
+				}				
+			}
+
+			// assign to each num its possible blacks
+			for (int bi = 0; bi < IntSize(line.Blacks); ++bi)
+			{
+				auto& b = line.Blacks[bi];
+				if (!Intersect(b.Black, n.Num).IsEmpty())
+				{
+					b.Nums.push_back(i);
+					n.Blacks.push_back(bi);
+				}
+			}
+
+		}
+
+
+		// if there are 2 crosses closer than minval - we can connect them
+
 		return ErrorCode::NoError;
 	}
 
@@ -132,21 +204,35 @@ namespace Solver
 
 		int NumSize = Input.Numbers().size();
 		if (NumSize == 0)
-			return Mark(Input.Vals().begin(), Input.Vals().end(), Grid::CValue::Cross);
+		{
+			CChanges chs(Input.Vals().begin());
+			return Mark(Input.Vals().begin(), Input.Vals().end(), Grid::CValue::Cross, chs);
+		}
 		std::vector<int> Lefts(NumSize), Rights(NumSize);
 
 		auto vLefts = subrange(Lefts);
 		auto vRRights = subrange(Rights.rbegin(), Rights.rend());
 
-		CVoid r = SolveOnePart(Input.Vals(), Input.Numbers(), vLefts);
-		if (!r) return r;
+		for (;;)
+		{
+			CChanges chs(Input.Vals().begin());
 
-		r = SolveOnePart(Input.RVals(), Input.RNumbers(), vRRights);
-		if (!r) return r;
+			CVoid r = SolveOnePart(Input.Vals(), Input.Numbers(), vLefts, chs);
+			if (!r) return r;
 
-		auto rLine = PrepareLineInfo(Input.Vals(), Input.Numbers(), vLefts, subrange(Rights));
-		if (!rLine) return rLine.Code();
+			r = SolveOnePart(Input.RVals(), Input.RNumbers(), vRRights, chs);
+			if (!r) return r;
 
-		return EvaluateLine(Input.Vals().begin(), Input.Vals().end(), rLine.Result());
+			auto rLine = PrepareLineInfo(Input.Vals(), Input.Numbers(), vLefts, subrange(Rights), chs);
+			if (!rLine) return rLine.Code();
+
+			auto rEval = EvaluateLine(Input.Vals().begin(), Input.Vals().end(), rLine.Result(), chs);
+			if (!rEval) return rEval.Code();
+
+			if (chs.IsEmpty())
+				return ErrorCode::NoError;
+
+		}
+
 	}
 }

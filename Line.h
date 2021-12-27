@@ -38,14 +38,19 @@ namespace Solver
 
 		CInterval() = default;
 
-		int left() const
+		int Left() const
 		{
 			return m_Left;
 		}
 
-		int right() const
+		int Right() const
 		{
 			return m_Right;
+		}
+
+		bool IsEmpty() const
+		{
+			return m_Left == m_Right;
 		}
 
 	private:

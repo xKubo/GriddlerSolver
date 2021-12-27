@@ -11,3 +11,4 @@
 
 #include <ranges>
 #include <optional>
+#include <variant>
