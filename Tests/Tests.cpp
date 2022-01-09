@@ -51,15 +51,23 @@ std::string SaveToString(std::span<CValue> vals)
 
 void TestRow(const CTestCase& tc)
 {
-	std::vector<CValue> Input = LoadFromString(tc.In), Expected = LoadFromString(tc.Expected);
+	std::vector<CValue> Input = LoadFromString(tc.In), Expected;
+
+	if (tc.Expected != "E")
+		Expected = LoadFromString(tc.Expected);
 
 	Row::CStringRowData d{ tc.Nums, Input };
 
-	Check(Input.size() == Expected.size(), "Input and expected values must have same size: ", Input.size(), "!=", Expected.size());
 	TStringRow sr{ d, 1, Utils::IntSize(Input), {0,0} };
-	auto r = SolveRow(sr);
-	BOOST_CHECK(r);
+	Result::CVoid r = SolveRow(sr);
+	if (tc.Expected == "E")
+	{
+		BOOST_CHECK(!r);
+		return;
+	}
 
+	BOOST_CHECK(r);
+	Check(Input.size() == Expected.size(), "Input and expected values must have same size: ", Input.size(), "!=", Expected.size());
 	std::string vals = SaveToString(sr.Values());
 	BOOST_CHECK_EQUAL(tc.Expected, vals);
 }
@@ -112,6 +120,43 @@ BOOST_AUTO_TEST_CASE(BlackAtTheEnd)
 }
 
 
+
+BOOST_AUTO_TEST_CASE(TwoBlacks)
+{
+	TestRow({
+		"OBOBB",
+		{1, 2},
+		"XBXBB",
+		});
+}
+
+
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(Advanced)
+
+BOOST_AUTO_TEST_CASE(ConnectCrossesThatAreTooClose)
+{
+	TestRow({
+		"OXOOXOOXOOOOOO",
+		{3},
+		"XXXXXXXXOOOOOO",
+		});
+}
+
+
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(Contradictions)
+
+BOOST_AUTO_TEST_CASE(TooBigNumber)
+{
+	TestRow({
+		"OO",
+		{3},
+		"E",
+		});
+}
 
 
 BOOST_AUTO_TEST_SUITE_END()
