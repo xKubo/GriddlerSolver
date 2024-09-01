@@ -48,6 +48,11 @@ namespace Solver
 			return m_Right;
 		}
 
+		int Size() const
+		{
+			return m_Right - m_Left;
+		}
+
 		bool IsEmpty() const
 		{
 			return m_Left == m_Right;
@@ -70,7 +75,7 @@ namespace Solver
 			if (itVal == end)
 				return res;
 			it = std::find_if(itVal, end, Not(v));
-			res.push_back({itVal - begin, it - begin});
+			res.push_back(Solver::CInterval(Utils::ToInt(itVal - begin), Utils::ToInt(it - begin)));
 		}
 	}
 

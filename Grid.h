@@ -3,17 +3,19 @@
 #include <vector>
 
 #include "Extents.h"
+#include "Utils.h"
 
 namespace Grid
 {
 	using CNumbers = std::vector<int>;
 	using CNumbersVec = std::vector<CNumbers>;
 
+	using Utils::IntSize;
 
 	inline int FindMaxNumbersCount(const CNumbersVec& v)
 	{
 		auto it = std::max_element(v.begin(), v.end(), [](const CNumbers& n1, const CNumbers& n2) { return n1.size() < n2.size(); });
-		return it->size();
+		return IntSize(*it);
 	}
 
 	using Extents::CExtents;

@@ -62,9 +62,15 @@ namespace Utils
 		return std::string{ std::istreambuf_iterator<char>(i), std::istreambuf_iterator<char>{} };
 	}
 
+	template <std::integral T>
+	inline int ToInt(T t)
+	{
+		return static_cast<int>(t);
+	}
+
 	template <typename T>
 	inline int IntSize(const T& t)
 	{
-		return static_cast<int>(t.size());
+		return ToInt(t.size());
 	}
 }

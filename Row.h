@@ -41,7 +41,7 @@ namespace Row
 			return this->m_pValue == other.m_pValue;
 		}
 
-		void advance(int n) { m_pValue += n*m_Stride; };
+		void advance(size_t n) { m_pValue += n*m_Stride; };
 
 		ptrdiff_t distance_to(TRowIterator<TRowData> other) const
 		{
@@ -130,7 +130,7 @@ namespace Row
 		{
 			TRowIterator<TRowData> iBeg{ ValueAt(m_Position), m_Stride};
 			auto iEnd = iBeg;
-			std::advance(iEnd, m_Stride * m_Length);
+			std::advance(iEnd, Utils::ToInt(m_Stride * m_Length));
 			return std::ranges::subrange(iBeg, iEnd );
 		}
 
@@ -182,6 +182,11 @@ namespace Row
 		TRowData& RowData()
 		{
 			return m_Data;
+		}
+
+		const CPosition &Position() const
+		{
+			return m_Position;
 		}
 
 	private:

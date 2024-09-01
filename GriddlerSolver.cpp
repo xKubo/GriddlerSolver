@@ -31,7 +31,7 @@ CTable CreateFromGrid(const CGrid& g)
     const auto& vs = g.Vertical();
     for (int i = 0; i < IntSize(vs); ++i)
     {
-        int Empty = MaxVert - vs[i].size();
+        int Empty = MaxVert - IntSize(vs[i]);
         for (int j = 0; j < IntSize(vs[i]); ++j)
         {
             es[MaxHoriz + i + (j+Empty) * W].Text = std::to_string(vs[i][j]);

@@ -1,7 +1,10 @@
 #pragma once
 
+#include "Utils.h"
+
 namespace Solver
 {
+	using Utils::IntSize;
 	template <typename TIterator>
 	struct CChanges
 	{
@@ -25,7 +28,7 @@ namespace Solver
 
 		void Add(TIterator it)
 		{
-			m_Positions.push_back(it - m_Begin);
+			m_Positions.push_back(Utils::ToInt(it - m_Begin));
 		}
 
 		const std::vector<int>& Positions() const
@@ -35,7 +38,7 @@ namespace Solver
 
 		int Count() const
 		{
-			return m_Positions.size();
+			return IntSize(m_Positions);
 		}
 
 	private:

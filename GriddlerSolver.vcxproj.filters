@@ -68,5 +68,8 @@
     <ClInclude Include="Changes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Diag.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

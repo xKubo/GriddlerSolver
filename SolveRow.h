@@ -12,6 +12,8 @@
 #include "Line.h"
 #include "Changes.h"
 
+#include "Diag.h"
+
 namespace Solver
 {
 	using Row::CRow;
@@ -43,7 +45,11 @@ namespace Solver
 		return ErrorCode::NoError;
 	}
 
-
+	template <typename TIt>
+	inline CVoid Mark(TIt At, CValue val, CChanges<TIt>& chs)
+	{
+		return Mark(At, At + 1, val, chs);
+	}
 
 
 	template <view TValues, view TNumbers, view TLefts>
@@ -78,7 +84,7 @@ namespace Solver
 				continue;
 			}
 
-			l = std::distance(begin(vs), iBeg);
+			l = Utils::ToInt(std::distance(begin(vs), iBeg));
 
 			// find possible blacks after n squares
 			auto iBlackEnd = std::find_if(iBeg + n, iEnd, Not{ CValue::Black });
@@ -122,7 +128,7 @@ namespace Solver
 			
 			int Left = Lefts[i];
 			int reversedright = Rights[Rights.size() - 1 - i];
-			int Right = size(vs) - reversedright;
+			int Right = IntSize(vs) - reversedright;
 			int n = nums[i];
 			l.Numbers.push_back(CNumber{ n, {Left, Right} });
 		}
@@ -143,8 +149,8 @@ namespace Solver
 	{
 		auto ValsBegin = begin(Vals);
 		auto ValsEnd = end(Vals);
-		int LineSize = ValsEnd - ValsBegin;
-		int MinVal = size(Vals);
+		int LineSize = Utils::ToInt(ValsEnd - ValsBegin);
+		int MinVal = IntSize(Vals);
 		for (int i = 0; i<IntSize(line.Numbers); ++i)
 		{
 			CNumber& n = line.Numbers[i];
@@ -153,32 +159,36 @@ namespace Solver
 			
 			int l = n.Interval.Left();
 			int r = n.Interval.Right();
-			int sz = r - l;
+			int sz = n.Interval.Size();
 			if (sz < n.Value)
 				return ErrorCode::LineTooSmall;
 
 
-			if (sz < 2 * n.Value)  // there are some blacks
+
+			if (sz == n.Value)  // exact fit - we can make cross before and after black - if possible
+			{
+				if (l != 0)
+				{
+					auto res = Mark(ValsBegin + l - 1, CValue::Cross, chs);
+					if (!res) return res;
+				}
+
+				if (r < LineSize - 1)
+				{
+					auto res = Mark(ValsBegin + r, CValue::Cross, chs);
+					if (!res) return res;
+				}
+			}
+			else if (sz < 2 * n.Value)  // left and right overlap - there are some black squares
 			{
 				int blackstart = l + sz - n.Value;
 				int blacksize = 2 * n.Value - sz;
 				auto res = Mark(ValsBegin + blackstart, ValsBegin + blackstart + blacksize, CValue::Black, chs);
 				if (!res) return res;
 			}
-
-			if (sz == n.Value)  // exact fit - we can make cross before and after - if possible
+			else
 			{
-				if (l != 0)
-				{
-					auto res = Mark(ValsBegin + l - 1, ValsBegin + l, CValue::Cross, chs);
-					if (!res) return res;
-				}
-
-				if (r < LineSize - 1)
-				{
-					auto res = Mark(ValsBegin + r, ValsBegin + r + 1, CValue::Cross, chs);
-					if (!res) return res;
-				}				
+				// left and right do not overlap
 			}
 
 			// assign to each num its possible blacks
@@ -222,6 +232,16 @@ namespace Solver
 			LastCrossAt = c.Right();			
 		}
 
+		// we have to find all possible coverages for blacks
+		// we try to infer limitations of the number positions
+
+		// grid solver state - 
+		// remember all guesses (either some field X/O, or black belongs to this number)
+		// run iterations in parallel - if contradiction found, discard, and mark the opposite in real solution
+
+
+
+
 		return ErrorCode::NoError;
 	}
 
@@ -229,7 +249,7 @@ namespace Solver
 	inline CVoid SolveRow(TRow &Input)
 	{
 
-		int NumSize = Input.Numbers().size();
+		int NumSize = IntSize(Input.Numbers());
 		if (NumSize == 0)
 		{
 			CChanges chs(Input.Vals().begin());
@@ -247,7 +267,7 @@ namespace Solver
 			CVoid r = SolveOnePart(Input.Vals(), Input.Numbers(), vLefts, chs);
 			if (!r) return r;
 
-			r = SolveOnePart(Input.RVals(), Input.RNumbers(), vRRights, chs);
+			r = SolveOnePart(Input.RVals(), Input.RNumbers(), vRRights, chs);   // BUG: chs should be reversed, too ... 
 			if (!r) return r;
 
 			auto rLine = PrepareLineInfo(Input.Vals(), Input.Numbers(), vLefts, subrange(Rights), chs);
