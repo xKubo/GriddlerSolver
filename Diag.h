@@ -16,7 +16,7 @@ namespace Diag
 
 	struct CContext
 	{
-		std::string Name = "NO_NAME";
+		std::string Name = "";
 	};
 
 	struct CDiag;
@@ -78,21 +78,21 @@ namespace Diag
 		}
 
 		template <typename ... Args>
-		void fmt(Level l, const Args& ... args)
+		void fmt(Level l, std::format_string<Args...> f, Args&& ... args)
 		{
-			ReportString(std::format(args...));
+			ReportString(std::format(f, std::forward<Args>(args)...));
 		}
 
 		template <typename ... Args>
-		void fmtI(Level l, const Args& ... args)
+		void fmtI(std::format_string<Args...> f, Args&& ... args)
 		{
-			fmt(Level::Info, args...);
+			fmt(Level::Info, f, std::forward<Args>(args)...);
 		}
 
 		template <typename ... Args>
-		void fmtE(Level l, const Args& ... args)
+		void fmtE(std::format_string<Args...> f, Args&& ... args)
 		{
-			fmt(Level::Error, args...);
+			fmt(Level::Error, f, std::forward<Args>(args)...);
 		}
 
 		CMsg LOG(Level l)

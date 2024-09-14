@@ -56,7 +56,7 @@ namespace Solver
 	requires 
 		std::is_same_v<range_value_t<TValues>, CValue> &&
 		std::integral<range_value_t<TNumbers>>
-	inline CVoid SolveOnePart(TValues vs, TNumbers nums, TLefts Lefts, auto& chs)
+	inline CVoid SolveInOneDir(TValues vs, TNumbers nums, TLefts Lefts, auto& chs)
 	{
 		using namespace std::ranges;
 		auto iBeg = std::begin(vs);
@@ -245,8 +245,23 @@ namespace Solver
 		return ErrorCode::NoError;
 	}
 
+	struct CContext
+	{
+		CContext()
+		{
+			m_Diag = Diag::CreateConsoleDiag("");
+		}
+
+		Diag::CDiag& Diag()
+		{
+			return m_Diag;
+		}
+	private:
+		Diag::CDiag m_Diag;
+	};
+
 	template <typename TRow>
-	inline CVoid SolveRow(TRow &Input)
+	inline CVoid SolveRow(TRow &Input, CContext& c)
 	{
 
 		int NumSize = IntSize(Input.Numbers());
@@ -262,22 +277,28 @@ namespace Solver
 
 		for (;;)
 		{
+			c.Diag().fmtI("{}", Input);
 			CChanges chs(Input.Vals().begin());
 
-			CVoid r = SolveOnePart(Input.Vals(), Input.Numbers(), vLefts, chs);
+			CVoid r = SolveInOneDir(Input.Vals(), Input.Numbers(), vLefts, chs);
 			if (!r) return r;
 
-			r = SolveOnePart(Input.RVals(), Input.RNumbers(), vRRights, chs);   // BUG: chs should be reversed, too ... 
+			r = SolveInOneDir(Input.RVals(), Input.RNumbers(), vRRights, chs);   // BUG: chs should be reversed, too ... 
 			if (!r) return r;
 
 			auto rLine = PrepareLineInfo(Input.Vals(), Input.Numbers(), vLefts, subrange(Rights), chs);
 			if (!rLine) return rLine.Code();
 
+
+			CLine& line = rLine.Result();
+
 			for (;;)
 			{
+				
+				c.Diag().fmtI("{}", line);
 				int ChangeCount = chs.Count();
 
-				auto rEval = EvaluateLine(Input.Vals(), rLine.Result(), chs);
+				auto rEval = EvaluateLine(Input.Vals(), line, chs);
 				if (!rEval) return rEval.Code();
 				
 				if (chs.Count() == ChangeCount)

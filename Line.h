@@ -4,6 +4,7 @@
 
 #include <iterator>
 #include <vector>
+#include "Utils.h"
 
 namespace Solver
 {
@@ -100,6 +101,12 @@ namespace Solver
 
 		}
 
+		CBlack(CInterval i, std::vector<int> Ns) :
+			Interval(i), Nums(Ns)
+		{
+
+		}
+
 		CBlack() = default;
 		CInterval Interval;
 		std::vector<int> Nums;
@@ -113,6 +120,75 @@ namespace Solver
 		CBlacks Blacks;
 	};
 
-
-
 }
+
+
+template<>
+struct std::formatter<Solver::CInterval, char>
+{
+
+	template<class ParseContext>
+	constexpr ParseContext::iterator parse(ParseContext& ctx)
+	{
+		return ctx.begin();
+	}
+
+	template<class FmtContext>
+	FmtContext::iterator format(Solver::CInterval i, FmtContext& ctx) const
+	{
+		return std::format_to(ctx.out(), "<{},{})", i.Left(), i.Right());
+	}
+};
+
+
+template<>
+struct std::formatter<Solver::CNumber, char>
+{
+
+	template<class ParseContext>
+	constexpr ParseContext::iterator parse(ParseContext& ctx)
+	{
+		return ctx.begin();
+	}
+
+	template<class FmtContext>
+	FmtContext::iterator format(const Solver::CNumber& n, FmtContext& ctx) const
+	{
+		return std::format_to(ctx.out(), "#{}:{}, Bs={}", n.Value, n.Interval, n.Blacks);
+	}
+};
+
+
+template<>
+struct std::formatter<Solver::CBlack, char>
+{
+
+	template<class ParseContext>
+	constexpr ParseContext::iterator parse(ParseContext& ctx)
+	{
+		return ctx.begin();
+	}
+
+	template<class FmtContext>
+	FmtContext::iterator format(const Solver::CBlack& b, FmtContext& ctx) const
+	{
+		return std::format_to(ctx.out(), "B:{}, #s={}", b.Interval, b.Nums);
+	}
+};
+
+template<>
+struct std::formatter<Solver::CLine, char>
+{
+
+	template<class ParseContext>
+	constexpr ParseContext::iterator parse(ParseContext& ctx)
+	{
+		return ctx.begin();
+	}
+
+	template<class FmtContext>
+	FmtContext::iterator format(const Solver::CLine &l, FmtContext& ctx) const
+	{
+		return std::format_to(ctx.out(), "B={}, X={}, Ns={})", l.Blacks, l.Crosses, l.Numbers);
+	}
+};

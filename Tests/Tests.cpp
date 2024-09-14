@@ -15,6 +15,8 @@ using Row::TStringRow;
 using Solver::SolveRow;
 using Utils::Check;
 using Utils::IntSize;
+using Grid::LoadFromString;
+using Grid::SaveToString;
 
 struct CTestCase
 {
@@ -23,54 +25,67 @@ struct CTestCase
 	std::string Expected;
 };
 
-std::string sVals = "OXB";
 
-std::vector<CValue> LoadFromString(const std::string& str)
-{
-	Grid::CValues vs;
-	for (char c : str)
-	{
-		auto pos = sVals.find(c);
-		Check(pos != -1, "Invalid value char: ", c);
-		vs.push_back(static_cast<CValue>(pos));
-	}
-	return vs;
-}
-
-std::string SaveToString(std::span<CValue> vals)
-{
-	std::string res;
-	for (CValue v : vals)
-	{
-		int pos = static_cast<int>(v);
-		Check(pos < IntSize(sVals), "Unexpected value: ", pos);
-		res.push_back(sVals[pos]);
-	}
-	return res;
-}
 
 void TestRow(const CTestCase& tc)
 {
 	std::vector<CValue> Input = LoadFromString(tc.In), Expected;
-
-	if (tc.Expected != "E")
-		Expected = LoadFromString(tc.Expected);
-
 	Row::CStringRowData d{ tc.Nums, Input };
-
 	TStringRow sr{ d, 1, Utils::IntSize(Input), {0,0} };
-	Result::CVoid r = SolveRow(sr);
+	Solver::CContext c;
+	Result::CVoid r = SolveRow(sr, c);
+
 	if (tc.Expected == "E")
-	{
+	{		
 		BOOST_CHECK(!r);
 		return;
 	}
 
+	Expected = LoadFromString(tc.Expected);
 	BOOST_CHECK(r);
 	Check(Input.size() == Expected.size(), "Input and expected values must have same size: ", Input.size(), "!=", Expected.size());
 	std::string vals = SaveToString(sr.Values());
 	BOOST_CHECK_EQUAL(tc.Expected, vals);
 }
+
+BOOST_AUTO_TEST_SUITE(Formats)
+
+BOOST_AUTO_TEST_CASE(TestPosition)
+{
+	Row::CPosition pos{ 2,3 };
+	auto s = std::format("{}", pos);
+	BOOST_REQUIRE_EQUAL(s, "[2, 3]");
+}
+
+BOOST_AUTO_TEST_CASE(TestInterval)
+{
+	Solver::CInterval i{ 0,5 };
+	auto s = std::format("{}", i);
+	BOOST_REQUIRE_EQUAL(s, "<0, 5)");
+}
+
+BOOST_AUTO_TEST_CASE(TestRow)
+{
+	auto values = LoadFromString("OO");
+	Row::CStringRowData d{ {2}, values };
+	TStringRow sr{ d, 1, Utils::IntSize(d.Values()), {0,0} };
+	const TStringRow& cr = sr;
+	std::string s = std::format("{}", cr);
+	BOOST_REQUIRE_EQUAL(s, "R[0, 0]:2\r\n01\r\nOO\r\n");
+}
+
+BOOST_AUTO_TEST_CASE(TestLine)
+{
+	Solver::CLine l;
+	l.Crosses = { {1,2}, {3,2} };
+	l.Numbers = { {2, {1,3}}, {3, {4,7}} };
+	l.Blacks = { {{1,2}, {1, 2, 3}}, {{1,2}, {1, 2, 3}} };
+	std::string s = std::format("{}", l);
+	BOOST_REQUIRE(!s.empty());
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
 
 BOOST_AUTO_TEST_SUITE(Basics)
 

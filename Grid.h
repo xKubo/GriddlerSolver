@@ -31,6 +31,32 @@ namespace Grid
 	using CValues = std::vector<CValue>;
 
 
+	inline std::string sVals = "OXB";
+
+	inline std::vector<CValue> LoadFromString(const std::string& str)
+	{
+		Grid::CValues vs;
+		for (char c : str)
+		{
+			auto pos = sVals.find(c);
+			Utils::Check(pos != -1, "Invalid value char: ", c);
+			vs.push_back(static_cast<CValue>(pos));
+		}
+		return vs;
+	}
+
+	template <typename TValsRange>
+	inline std::string SaveToString(const TValsRange &vals)
+	{
+		std::string res;
+		for (const CValue &v : vals)
+		{
+			int pos = static_cast<int>(v);
+			Utils::Check(pos < IntSize(sVals), "Unexpected value: ", pos);
+			res.push_back(sVals[pos]);
+		}
+		return res;
+	}
 
 	struct CGrid
 	{

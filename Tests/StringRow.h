@@ -31,6 +31,11 @@ namespace Row
 			return m_Values;
 		}
 
+		std::span<const CValue> Values() const
+		{
+			return m_Values;
+		}
+
 	private:
 		std::vector<int> m_Numbers;
 		std::vector<CValue> m_Values;

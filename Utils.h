@@ -3,6 +3,8 @@
 #include <boost/algorithm/string/split.hpp>
 #include <sstream>
 
+#include <format>
+
 namespace Utils
 {
 	template <typename ... TArgs>
@@ -51,6 +53,12 @@ namespace Utils
 		return nums;
 	}
 
+	template <typename E> requires std::is_enum_v<E>
+	inline std::underlying_type_t<E> operator+(E e)
+	{
+		return static_cast<std::underlying_type_t<E>>(e);
+	}
+
 	inline std::vector<int> GetNextNumsLine(std::istream& i)
 	{
 		auto s = GetLine(i);
@@ -73,4 +81,56 @@ namespace Utils
 	{
 		return ToInt(t.size());
 	}
+
+
+	template <typename T>
+	struct Range
+	{
+
+		template<class ParseContext>
+		constexpr ParseContext::iterator parse(ParseContext& ctx)
+		{
+			return ctx.begin();
+		}
+
+		template<class FmtContext>
+		FmtContext::iterator format(const T& v, FmtContext& ctx) const
+		{
+			using namespace std::literals;
+			auto i = ctx.out();
+			if (v.empty())
+			{
+				return std::ranges::copy("[]"sv, i).out;
+			}
+			bool first = true;
+			for (const auto& e : v)
+			{
+				if (first)
+				{
+					first = false;
+					*i++ = '[';
+				}
+				else
+					*i++ = ',';
+				i = std::format_to(i, "{}", e);
+			}
+			*i++ = ']';
+			return i;
+		}
+	};
+
 }
+
+
+
+template<typename T, typename TAlloc>
+struct std::formatter<std::vector<T, TAlloc>, char> : Utils::Range<std::vector<T, TAlloc>>
+{
+
+};
+
+template<typename T>
+struct std::formatter<std::span<T>, char> : Utils::Range<std::span<T>>
+{
+
+};
